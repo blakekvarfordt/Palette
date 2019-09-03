@@ -11,6 +11,10 @@ import UIKit
 class PaletteListViewController: UIViewController {
     
     var photos: [UnsplashPhoto] = []
+    
+    var buttons: [UIButton] {
+        return [randomButton, featuredButton, doubleRainbowButton]
+    }
 
     var safeArea: UILayoutGuide {
         return self.view.safeAreaLayoutGuide
@@ -27,6 +31,9 @@ class PaletteListViewController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .white
         configureTableView()
+        activateButtons()
+        selectButton(featuredButton)
+        searchForCategory(.featured)
     }
     
     func addAllSubviews() {
@@ -59,16 +66,40 @@ class PaletteListViewController: UIViewController {
         // do any edigin to tableView properties
         tableView.allowsSelection = false
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    func activateButtons() {
+        buttons.forEach({ $0.addTarget(self, action: #selector(searchButtonTqpped(sender:)), for: .touchUpInside)})
     }
-    */
+    
+    func searchForCategory(_ unsplashRoute: UnsplashRoute) {
+        UnsplashService.shared.fetchFromUnsplash(for: unsplashRoute) { (photos) in
+            DispatchQueue.main.async {
+                guard let photos = photos else { return }
+                self.photos = photos
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
+    func selectButton(_ button: UIButton) {
+        buttons.forEach({ $0.setTitleColor(UIColor.lightGray, for: .normal)})
+        button.setTitleColor(UIColor(named: "devmountainBlue"), for: .normal)
+        
+    }
+    
+    @objc func searchButtonTqpped(sender: UIButton) {
+        selectButton(sender)
+        switch sender {
+        case featuredButton:
+            searchForCategory(.featured)
+        case randomButton:
+            searchForCategory(.random)
+        case doubleRainbowButton:
+            searchForCategory(.doubleRainbow)
+        default:
+            print("Route not found")
+        }
+    }
 
     //MARK: - Views
     let featuredButton: UIButton = {
