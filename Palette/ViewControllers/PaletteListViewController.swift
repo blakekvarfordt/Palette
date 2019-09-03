@@ -9,6 +9,8 @@
 import UIKit
 
 class PaletteListViewController: UIViewController {
+    
+    var photos: [UnsplashPhoto] = []
 
     var safeArea: UILayoutGuide {
         return self.view.safeAreaLayoutGuide
@@ -24,6 +26,7 @@ class PaletteListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
+        configureTableView()
     }
     
     func addAllSubviews() {
@@ -45,6 +48,16 @@ class PaletteListViewController: UIViewController {
         buttonStackView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 16).isActive = true
         buttonStackView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -16).isActive = true
 
+    }
+    
+    func configureTableView() {
+        // delegate, data source
+        tableView.delegate = self
+        tableView.dataSource = self
+        // register our custom cell
+        tableView.register(PaletteTableViewCell.self, forCellReuseIdentifier: "colorCell")
+        // do any edigin to tableView properties
+        tableView.allowsSelection = false
     }
 
     /*
@@ -95,4 +108,30 @@ class PaletteListViewController: UIViewController {
         
         return tableView
     }()
+}
+
+extension PaletteListViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let imageViewSpacing: CGFloat = (view.frame.width - (SpacingConstants.outerHorizontalPadding * 2))
+        let titleLabelSpacing: CGFloat = SpacingConstants.oneLineElementHeight
+        let colorPaletteSpacing: CGFloat = SpacingConstants.twoLineElementHeight
+        let verticalPadding: CGFloat = (3 * SpacingConstants.verticalObjectBuffer)
+        let outerVerticalPadding: CGFloat = (2 * SpacingConstants.outerHorizontalPadding)
+        
+        return imageViewSpacing + titleLabelSpacing + colorPaletteSpacing + verticalPadding + outerVerticalPadding
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return photos.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "colorCell", for: indexPath) as? PaletteTableViewCell else { return UITableViewCell() }
+       let photo = photos[indexPath.row]
+        cell.unsplashPhoto = photo
+        return cell
+    }
+    
+    
 }
